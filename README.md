@@ -1,20 +1,3 @@
-<!--<h3 align="center">
-![image](https://user-images.githubusercontent.com/6764957/87082196-3418a980-c25d-11ea-9987-0d9787d54100.png)
-</h3> -->
-
-[![image](https://user-images.githubusercontent.com/6764957/87083194-cec5b800-c25e-11ea-85b4-0bebc4374e07.png)](https://github.com/sw-yx?tab=repositories)
-
-<p align="center">
-  <img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pinterest.com%2Fpin%2F366902700877567980%2F&psig=AOvVaw0DHx1jpTKfmc1QHqMvco30&ust=1607115336628000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCIjfwafZsu0CFQAAAAAdAAAAABAD" alt="profile views"> •  
-  <a href="https://twitter.com/intent/follow?screen_name=swyx&tw_p=followbutton"><img src="https://img.shields.io/twitter/follow/swyx?label=%40swyx&style=social"></a>  •
-  <a href="https://swyx.io">Blog</a> •
-  <a href="https://twitter.com/intent/follow?screen_name=swyx&tw_p=followbutton">Twitter</a> •
-  <a href="https://github.com/sw-yx/README">Work README</a> •
-  <a href="https://learninpublic.org/?from=GH%20README">The Coding Career Handbook</a>
-</p>
-
----
-
 ### Here is what I'm working on! 👋
 
 
