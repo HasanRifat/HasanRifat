@@ -25,6 +25,9 @@ Coding Languages:
 - React
 - Ruby
 - MongoDB
+- C#
+- PHP
+- Swift
 ```
 
 
