@@ -9,7 +9,6 @@
 |---|---|---|
 
 ***
-
 Coding Languages: 
 ```diff
 + Java
