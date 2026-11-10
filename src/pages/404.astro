@@ -1,0 +1,15 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import Door from '../components/Door.astro';
+import { href } from '../lib/url';
+---
+<Sheet room="plan" title="Not on the plan" subtitle="Not found">
+  <section class="sheet">
+    <header class="sheet-head">
+      <p class="mono cap eyebrow"><b>A-00</b><span>404</span></p>
+      <h1 class="display">This room isn't <em>on the plan.</em></h1>
+      <p class="standfirst">Either it was never built or the drawing changed. The plan knows where everything is.</p>
+    </header>
+    <a class="go" href={href('/')}><Door />Back to the plan</a>
+  </section>
+</Sheet>

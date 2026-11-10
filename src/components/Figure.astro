@@ -1,0 +1,97 @@
+---
+// Schematics, not screenshots. One drawing per project, keyed from frontmatter.
+interface Props { kind: 'shop' | 'dashboard' | 'shelf' | 'roots' | 'flow' | 'bot' }
+const { kind } = Astro.props;
+const spines = [14, 9, 18, 11, 7, 16, 12, 9, 20, 10, 13, 8, 15, 11, 17, 9, 12, 14];
+let sx = 40;
+const shelf = (y: number, off: number) => {
+  let x = 44;
+  return spines.map((w, i) => {
+    const ww = spines[(i + off) % spines.length];
+    const hh = 52 + ((i * 7 + off * 5) % 22);
+    const r = { x, y: y - hh, w: ww, h: hh, hot: (i + off) % 11 === 4 };
+    x += ww + 3;
+    return r;
+  }).filter((r) => r.x + r.w < 356);
+};
+---
+<svg class="fig" viewBox="0 0 400 300" role="img" aria-label={`Schematic drawing: ${kind}`}>
+  {kind === 'shop' && (
+    <g>
+      <path class="w" d="M40 40H360V260H250M190 260H40V40" />
+      <path d="M190 260V200A60 60 0 0 1 250 260" class="a" />
+      <rect x="60" y="60" width="200" height="34" /><path d="M60 77H260M100 60V94M140 60V94M180 60V94M220 60V94" />
+      <rect x="290" y="60" width="50" height="90" /><path d="M290 90H340M290 120H340" />
+      <rect x="60" y="130" width="130" height="26" class="s" />
+      <rect x="70" y="190" width="70" height="14" /><rect x="70" y="220" width="70" height="14" />
+      <path d="M220 240V170H330" stroke-dasharray="3 5" class="a" />
+      <text x="62" y="124">COLD CASE</text><text x="62" y="176">COUNTER</text><text x="262" y="282" class="at">ENTRY</text>
+    </g>
+  )}
+  {kind === 'dashboard' && (
+    <g>
+      <rect x="40" y="40" width="320" height="220" />
+      <path d="M40 66H360M150 66V260M150 150H360M262 150V260" />
+      <circle cx="95" cy="118" r="34" /><path d="M95 118V94M95 118L112 128" class="a" />
+      <path d="M60 180H130M60 196H118M60 212H130M60 228H100" />
+      <path d="M170 132L196 110L222 122L250 92L282 104L340 84" class="a" />
+      <rect x="168" y="168" width="78" height="14" class="s" /><path d="M168 196H246M168 210H230M168 224H240" />
+      <path d="M280 170H344M280 186H344M280 202H320" /><circle cx="52" cy="53" r="3" class="s" /><circle cx="64" cy="53" r="3" />
+      <text x="282" y="244" class="at">ASSISTANT ▍</text>
+    </g>
+  )}
+  {kind === 'shelf' && (
+    <g>
+      <path class="w" d="M36 40V262M364 40V262" /><path d="M36 110H364M36 186H364M36 262H364" />
+      {[110, 186, 262].map((y, k) => shelf(y, k * 5).map((b) => <rect x={b.x} y={b.y} width={b.w} height={b.h} class:list={{ hot: b.hot }} />))}
+      <text x="40" y="282">KHIZĀNAT AL-KUTUB</text>
+    </g>
+  )}
+  {kind === 'roots' && (
+    <g>
+      {[['ف', 290], ['ع', 200], ['ل', 110]].map(([l, x]) => (
+        <g><circle cx={x} cy="78" r="30" /><text x={x} y="92" class="art" text-anchor="middle">{l}</text></g>
+      ))}
+      <path d="M290 108V150M200 108V150M110 108V150M110 150H290M200 150V172" class="a" />
+      {[['فَعَلَ', 70], ['يَفْعَلُ', 157], ['فَاعِل', 244], ['مَفْعُول', 331]].map(([w, x]) => (
+        <g><path d={`M${x} 172V190`} class="a" /><rect x={Number(x) - 38} y="190" width="76" height="50" /><text x={x} y="224" class="art sm" text-anchor="middle">{w}</text></g>
+      ))}
+      <path d="M70 172H331" class="a" /><text x="40" y="270">ROOT → PATTERN</text>
+    </g>
+  )}
+  {kind === 'flow' && (
+    <g>
+      <rect x="40" y="50" width="96" height="44" class="s" /><path d="M136 72H176" class="a" />
+      <path d="M216 40L256 72L216 104L176 72Z" /><path d="M256 72H296M216 104V150" class="a" />
+      <rect x="296" y="50" width="70" height="44" /><rect x="168" y="150" width="96" height="44" />
+      <path d="M216 194V224M88 224H344M88 224V240M216 224V240M344 224V240" class="a" />
+      <rect x="48" y="240" width="80" height="30" /><rect x="176" y="240" width="80" height="30" /><rect x="304" y="240" width="80" height="30" transform="translate(-10 0)" />
+      <text x="50" y="42">TRIGGER</text><text x="298" y="42">NOTIFY</text><text x="272" y="176">APPROVE</text>
+    </g>
+  )}
+  {kind === 'bot' && (
+    <g>
+      <rect x="40" y="40" width="320" height="220" /><path d="M40 66H360" />
+      <circle cx="54" cy="53" r="3" /><circle cx="66" cy="53" r="3" /><circle cx="78" cy="53" r="3" />
+      <text x="60" y="100" class="t">&gt; !flip</text>
+      <text x="60" y="124" class="t at">yoru: heads.</text>
+      <text x="60" y="160" class="t">&gt; !warn @user spam</text>
+      <text x="60" y="184" class="t at">yoru: logged. infraction #3</text>
+      <text x="60" y="220" class="t">&gt; ▍</text>
+    </g>
+  )}
+</svg>
+
+<style>
+  .fig { width: 100%; height: auto; display: block; }
+  .fig :global(*) { fill: none; stroke: var(--ink); stroke-width: 1.1; vector-effect: non-scaling-stroke; }
+  .fig :global(.w) { stroke-width: 4; }
+  .fig :global(.a) { stroke: var(--accent); }
+  .fig :global(.s) { fill: var(--ink); stroke: none; }
+  .fig :global(.hot) { fill: var(--accent); stroke: var(--accent); }
+  .fig :global(text) { font: 500 9px var(--mono); letter-spacing: 0.14em; fill: var(--graphite); stroke: none; }
+  .fig :global(text.at), .fig :global(.t.at) { fill: var(--accent); }
+  .fig :global(text.t) { font-size: 12px; letter-spacing: 0.02em; fill: var(--ink); }
+  .fig :global(text.art) { font: 400 36px var(--arabic); letter-spacing: 0; fill: var(--ink); }
+  .fig :global(text.art.sm) { font-size: 24px; }
+</style>

@@ -1,0 +1,18 @@
+{
+  "updated": "2026-11-10",
+  "building": [
+    { "title": "Barakah Poultry", "note": "A halal poultry and grocery business, from the counter outward." },
+    { "title": "Dīwān", "note": "A personal dashboard that is slowly turning into an assistant." },
+    { "title": "Khizānah", "note": "A catalogue for Islamic books, lectures and study material." }
+  ],
+  "learning": [
+    { "title": "Classical & Qur'anic Arabic", "note": "And building the structured path I wanted when I started." }
+  ],
+  "exploring": [
+    { "title": "Architecture and interiors", "note": "How a room tells you what to do in it." },
+    { "title": "Assistants and personal systems", "note": "What is worth automating, and what should stay manual." }
+  ],
+  "toward": [
+    { "title": "Work of my own", "note": "Things that outlast a job title. No rush, not waiting either." }
+  ]
+}

@@ -1,0 +1,8 @@
+---
+const { no, label, title, standfirst } = Astro.props;
+---
+<header class="sheet-head">
+  <p class="mono cap eyebrow"><b>{no}</b><span>{label}</span></p>
+  <h1 class="display">{title}</h1>
+  {standfirst && <p class="standfirst">{standfirst}</p>}
+</header>

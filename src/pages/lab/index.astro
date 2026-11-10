@@ -1,0 +1,62 @@
+---
+import Sheet from '../../layouts/Sheet.astro';
+import SheetHead from '../../components/SheetHead.astro';
+import SheetFoot from '../../components/SheetFoot.astro';
+import Door from '../../components/Door.astro';
+import { experiments } from '../../data/experiments';
+import { href } from '../../lib/url';
+---
+<Sheet room="lab" title="Laboratory" description="Small working experiments by Rifat Hasan: a shadow engine, an Arabic morphology machine, and a sundial for Los Angeles.">
+  <section class="sheet">
+    <SheetHead no="A-04" label="Experiments" title="Laboratory" standfirst="Nothing in here has to be useful. Everything in here works." />
+
+    <ul class="bench">
+      {experiments.map((x, i) => (
+        <li style={`--i:${i}`}>
+          <a href={href(`/lab/${x.slug}/`)} class="spec">
+            <span class="mono tag"><b>{x.no}</b><span>{x.kind}</span></span>
+            <span class="glyph" aria-hidden="true">
+              {x.slug === 'light-study' && <svg viewBox="0 0 120 120"><path class="sh" d="M40 30L96 12L112 76L64 84Z" /><rect class="s" x="36" y="30" width="8" height="54" /><rect class="s" x="36" y="80" width="30" height="8" /><circle class="a" cx="16" cy="100" r="5" /></svg>}
+              {x.slug === 'wazn' && <svg viewBox="0 0 120 120"><text x="60" y="78" text-anchor="middle" class="art">فعل</text><path d="M14 96H106M14 24H106" /></svg>}
+              {x.slug === 'sundial' && <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="44" /><path class="a" d="M60 60L92 30" /><path d="M60 16V24M60 96V104M16 60H24M96 60H104" /><circle class="s" cx="60" cy="60" r="3" /></svg>}
+            </span>
+            <span class="name">{x.title}</span>
+            <span class="blurb">{x.blurb}</span>
+            <span class="go"><Door />Open</span>
+          </a>
+        </li>
+      ))}
+      <li class="empty" style="--i:3">
+        <span class="mono tag"><b>X-04</b><span>Reserved</span></span>
+        <span class="blurb">An empty spot on the bench. Something will end up here.</span>
+      </li>
+    </ul>
+  </section>
+  <SheetFoot room="lab" />
+</Sheet>
+
+<style>
+  .bench { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); border-top: 1px solid var(--ink); border-left: 1px solid var(--line); }
+  .bench li { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .bench li:nth-child(even) .spec { padding-top: 4.5rem; }
+  .spec, .empty { display: grid; gap: 1rem; padding: 1.4rem; text-decoration: none; height: 100%; align-content: start; color: var(--ink); }
+  .tag { display: flex; justify-content: space-between; text-transform: uppercase; letter-spacing: 0.12em; color: var(--graphite); }
+  .tag b { color: var(--accent); font-weight: 500; }
+  .glyph { display: block; width: 7.5rem; margin: 1.5rem 0 0.5rem; transition: transform 0.7s var(--ease); }
+  .glyph svg { display: block; overflow: visible; }
+  .glyph :global(*) { fill: none; stroke: var(--ink); stroke-width: 1.1; vector-effect: non-scaling-stroke; }
+  .glyph :global(.s) { fill: var(--ink); stroke: none; }
+  .glyph :global(.sh) { fill: var(--ink); opacity: 0.14; stroke: none; }
+  .glyph :global(.a) { stroke: var(--accent); }
+  .glyph :global(circle.a) { fill: var(--accent); }
+  .glyph :global(.art) { font: 400 54px var(--arabic); fill: var(--ink); stroke: none; }
+  .spec:hover .glyph { transform: rotate(-6deg) scale(1.06); }
+  .name { font: 300 clamp(2rem, 3.4vw, 2.8rem)/1 var(--serif); font-variation-settings: 'opsz' 144; letter-spacing: -0.03em; }
+  .spec:hover .name { font-style: italic; color: var(--accent); }
+  .blurb { font-size: 0.94rem; line-height: 1.5; color: var(--graphite); }
+  .spec .go { margin-top: 1rem; }
+  .empty { background: repeating-linear-gradient(135deg, transparent 0 7px, var(--hair) 7px 8px); }
+  @media (prefers-reduced-motion: no-preference) {
+    .bench li { animation: rise 0.9s calc(var(--i) * 0.08s + 0.2s) var(--ease) both; }
+  }
+</style>

@@ -1,0 +1,79 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import SheetFoot from '../components/SheetFoot.astro';
+import Door from '../components/Door.astro';
+import { site } from '../data/site';
+---
+<Sheet room="door" title="Contact" description="How to reach Rifat Hasan: email, GitHub and LinkedIn.">
+  <section class="sheet knock-sheet">
+    <header class="sheet-head">
+      <p class="mono cap eyebrow"><b>A-07</b><span>Contact</span></p>
+      <h1 class="display"><button type="button" class="knock" data-knock aria-label="Knock: copy the email address">Knock<span class="dot">.</span></button></h1>
+      <p class="standfirst">The front door. It opens for work, for questions, and for a good idea that needs a second pair of hands.</p>
+    </header>
+
+    <ul class="bells">
+      <li>
+        <a href={`mailto:${site.email}`}>
+          <span class="mono cap">Email</span>
+          <span class="v">{site.email}</span>
+          <Door size={26} />
+        </a>
+        <button type="button" class="mono copy" data-copy={site.email}>Copy</button>
+      </li>
+      {site.links.map((l) => (
+        <li>
+          <a href={l.url} rel="me noopener">
+            <span class="mono cap">{l.label}</span>
+            <span class="v">{l.handle}</span>
+            <Door size={26} />
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mono cap hours">Based in {site.location} · Los Angeles time, <time data-clock>--:--:--</time></p>
+  </section>
+  <SheetFoot room="door" />
+</Sheet>
+
+<script>
+  const email = document.querySelector<HTMLElement>('[data-copy]')?.dataset.copy ?? '';
+  const say = (m: string) => document.dispatchEvent(new CustomEvent('toast', { detail: m }));
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(email); say('Address copied'); }
+    catch { say(email); }
+  };
+  document.querySelector('[data-copy]')?.addEventListener('click', copy);
+  const knock = document.querySelector<HTMLElement>('[data-knock]');
+  knock?.addEventListener('click', () => {
+    knock.classList.remove('is-knocked');
+    void knock.offsetWidth;
+    knock.classList.add('is-knocked');
+    copy();
+  });
+</script>
+
+<style>
+  .knock { font: inherit; letter-spacing: inherit; line-height: inherit; text-align: left; font-size: clamp(5.5rem, 21vw, 19rem); display: inline-block; transform-origin: 0 100%; }
+  .knock .dot { color: var(--accent); }
+  .knock:hover { font-style: italic; }
+  :global(.is-knocked) { animation: knock 0.5s var(--ease); }
+  @keyframes knock { 20% { transform: translate(5px, 3px) rotate(0.6deg); } 40% { transform: none; } 60% { transform: translate(4px, 2px) rotate(0.4deg); } }
+  .bells { border-top: 1px solid var(--ink); }
+  .bells li { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
+  .bells a {
+    flex: 1; min-width: 0; display: grid; grid-template-columns: 7rem minmax(0, 1fr) auto; align-items: baseline; gap: 1rem;
+    padding: 1.5rem 0; text-decoration: none; transition: padding 0.45s var(--ease);
+  }
+  .bells a:hover { padding-left: 0.9rem; }
+  .v { font: 300 clamp(1.35rem, 4.4vw, 3.4rem)/1.05 var(--serif); font-variation-settings: 'opsz' 144; letter-spacing: -0.025em; overflow-wrap: anywhere; }
+  .bells a:hover .v { font-style: italic; }
+  .bells a :global(.door) { align-self: center; }
+  .copy { padding: 0 1.2rem; margin-left: 1rem; border-left: 1px solid var(--line); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 500; }
+  .copy:hover { background: var(--ink); color: var(--paper); }
+  .hours { margin-top: 1.2rem; }
+  @media (max-width: 640px) {
+    .bells a { grid-template-columns: minmax(0, 1fr) auto; }
+    .bells a .cap { grid-column: 1 / -1; }
+  }
+</style>
