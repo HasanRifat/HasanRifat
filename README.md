@@ -1,20 +1,18 @@
 ![banner](https://user-images.githubusercontent.com/56574576/101088546-b71e0180-3568-11eb-985b-3e126d7f6966.jpg)
 
-Hi 👋 My name is Rifat Hasan
-============================
+# Rifat Hasan
 
-Support Specialist & Web Developer
-----------------------------------
+**Information Systems Analyst II, Los Angeles County Public Defender**
 
-I started coding in 2020 and finished my bachelors in Computer Science and a minor in Cybersecurity.
+I work on the unglamorous end of software: the forms, queues and internal tools an institution actually runs on. Before this I built applications for the Los Angeles County Board of Supervisors, and before that I worked in quality assurance at Kodify.
 
-* 🌍  I'm based in California
-* 🖥️  See my portfolio at [Rifat's Portfolio](http://https://hasanrifat.github.io/)
-* ✉️  You can contact me at [rifat562hasan@gmail.com](mailto:rifat562hasan@gmail.com)
-* 🧠  I'm learning Java Spring
+After hours the projects get more personal: a halal poultry business, a library system for Islamic books and lectures, a structured path through Classical and Qur'anic Arabic, and a private dashboard that is slowly becoming an assistant.
 
-<a href="https://www.github.com/HasanRifat" target="_blank" rel="noreferrer"><img
-src="https://img.shields.io/github/followers/HasanRifat?logo=github&style=for-the-badge&color=0891b2&labelColor=1c1917" /></a>
+- **Site:** [hasanrifat.github.io/HasanRifat](https://hasanrifat.github.io/HasanRifat/)
+- **Works in:** Power Platform, web, automation, data
+- **Studied:** Computer Science, California State University, Long Beach
+- **Based:** Southern California
+- **Contact:** [rifat562hasan@gmail.com](mailto:rifat562hasan@gmail.com) · [LinkedIn](https://www.linkedin.com/in/rifat-hasan-/)
 
 ### Skills
 
@@ -31,7 +29,7 @@ src="https://img.shields.io/github/followers/HasanRifat?logo=github&style=for-th
 <a href="https://nodejs.org/en/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/nodejs-colored.svg" width="36" height="36" alt="NodeJS" /></a>
 <a href="https://www.mysql.com/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/mysql-colored.svg" width="36" height="36" alt="MySQL" /></a>
 <a href="https://dotnet.microsoft.com/en-us/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/dot-net-colored.svg" width="36" height="36" alt=".NET" /></a>
-<a href="adobe.com/uk/products/illustrator.html" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/illustrator-colored-dark.svg" width="36" height="36" alt="Illustrator" /></a>
+<a href="https://www.adobe.com/uk/products/illustrator.html" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/illustrator-colored-dark.svg" width="36" height="36" alt="Illustrator" /></a>
 <a href="https://www.adobe.com/uk/products/premiere.html" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/premierepro-colored-dark.svg" width="36" height="36" alt="Premiere Pro" /></a>
 <a href="https://www.figma.com/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/skills/figma-colored.svg" width="36" height="36" alt="Figma" /></a>
 </p>
@@ -39,7 +37,7 @@ src="https://img.shields.io/github/followers/HasanRifat?logo=github&style=for-th
 
 ### Socials
 
-<p align="left"> <a href="https://discord.com/users/Foogazy#7865" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/discord.svg" width="32" height="32" /></a> <a href="https://www.github.com/HasanRifat" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/github-dark.svg" width="32" height="32" /></a> <a href="http://www.instagram.com/foogazy__" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/instagram.svg" width="32" height="32" /></a> <a href="https://www.linkedin.com/in/rifat-hasan-/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/linkedin.svg" width="32" height="32" /></a></p>
+<p align="left"> <a href="https://discord.com/users/Foogazy#7865" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/discord.svg" width="32" height="32" /></a> <a href="https://www.github.com/HasanRifat" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/github-dark.svg" width="32" height="32" /></a> <a href="https://www.instagram.com/foogazy__" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/instagram.svg" width="32" height="32" /></a> <a href="https://www.linkedin.com/in/rifat-hasan-/" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/danielcranney/readme-generator/main/public/icons/socials/linkedin.svg" width="32" height="32" /></a></p>
 
 ### Support Me
 
