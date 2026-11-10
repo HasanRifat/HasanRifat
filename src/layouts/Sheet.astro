@@ -6,6 +6,8 @@ import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/500.css';
 import '@fontsource/amiri/arabic-400.css';
 import '../styles/global.css';
+import frauncesUrl from '@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2?url';
+import frauncesItalicUrl from '@fontsource-variable/fraunces/files/fraunces-latin-opsz-italic.woff2?url';
 import Plan from '../components/Plan.astro';
 import Door from '../components/Door.astro';
 import { site } from '../data/site';
@@ -39,6 +41,9 @@ const jsonLd = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+    <link rel="sitemap" href={href('/sitemap.xml')} />
+    <link rel="preload" as="font" type="font/woff2" href={frauncesUrl} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={frauncesItalicUrl} crossorigin />
     <meta name="theme-color" content="#EEE8DB" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={pageTitle} />
