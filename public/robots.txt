@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hasanrifat.github.io/HasanRifat/sitemap.xml

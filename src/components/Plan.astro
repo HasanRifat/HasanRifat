@@ -1,0 +1,141 @@
+---
+import { walls, doors, doorPath, rooms, fountain } from '../lib/plan';
+import { sheets, type RoomKey } from '../data/sheets';
+import { href } from '../lib/url';
+
+interface Props { mode?: 'full' | 'key'; current?: RoomKey; artifacts?: number }
+const { mode = 'full', current, artifacts = 6 } = Astro.props;
+const full = mode === 'full';
+const viewBox = full ? '-96 -104 1116 770' : '-12 -12 984 624';
+const roomSheets = sheets.filter((s) => s.room !== 'plan');
+const labelAt: Record<string, [number, number]> = {
+  workshop: [24, 232], lab: [424, 124], library: [664, 312],
+  sitting: [24, 572], courtyard: [284, 572], door: [664, 572],
+};
+const star = (cx: number, cy: number, r: number) => {
+  const sq = (a: number) => [0, 1, 2, 3].map((i) => {
+    const t = a + (i * Math.PI) / 2;
+    return `${(cx + r * Math.cos(t)).toFixed(1)},${(cy + r * Math.sin(t)).toFixed(1)}`;
+  }).join(' ');
+  return [sq(0), sq(Math.PI / 4)];
+};
+const [s1, s2] = star(fountain.x, fountain.y, 30);
+const ticks = (x: number, y: number, n: number, step: number, len: number, vertical = false) =>
+  Array.from({ length: n }, (_, i) => vertical
+    ? `M${x} ${y + i * step}h${len}` : `M${x + i * step} ${y}v${len}`).join('');
+---
+<svg
+  class:list={['plan', `plan--${mode}`]}
+  viewBox={viewBox}
+  role={full ? 'group' : 'img'}
+  aria-label={full ? 'Floor plan of the site. Each room is a section.' : 'Key plan'}
+  data-plan={mode}
+>
+  {full && (
+    <defs>
+      <radialGradient id="glow">
+        <stop offset="0" stop-color="var(--glow)" stop-opacity="var(--glow-a)" />
+        <stop offset="1" stop-color="var(--glow)" stop-opacity="0" />
+      </radialGradient>
+      <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="7" stroke="var(--accent)" stroke-width="1.1" />
+      </pattern>
+    </defs>
+  )}
+
+  {full && (
+    <g class="plan-anno" aria-hidden="true">
+      <!-- dimension strings and grid bubbles -->
+      <path d="M0 -44H960M0 -52v16M400 -52v16M640 -52v16M960 -52v16M-44 0V600M-52 0h16M-52 260h16M-52 600h16" />
+      {[[0, 'A'], [400, 'B'], [640, 'C'], [960, 'D']].map(([x, l]) => (
+        <g><circle cx={x} cy="-80" r="13" /><text x={x} y="-76" text-anchor="middle">{l}</text></g>
+      ))}
+      {[[0, '1'], [260, '2'], [600, '3']].map(([y, l]) => (
+        <g><circle cx="-74" cy={y} r="13" /><text x="-74" y={Number(y) + 4} text-anchor="middle">{l}</text></g>
+      ))}
+      <text x="200" y="-52" text-anchor="middle">4 000</text>
+      <text x="520" y="-52" text-anchor="middle">2 400</text>
+      <text x="800" y="-52" text-anchor="middle">3 200</text>
+      <text x="860" y="640" text-anchor="middle" class="plan-entry">▲ ENTRY</text>
+    </g>
+  )}
+
+  {full && <circle class="plan-glow" data-glow cx={fountain.x} cy={fountain.y} r="330" fill="url(#glow)" />}
+  {full && <path class="plan-shadow" data-shadow d="" />}
+
+  {full && (
+    <g class="plan-fur" aria-hidden="true">
+      <!-- workshop: bench with one object per project -->
+      <rect x="40" y="44" width="250" height="72" />
+      {Array.from({ length: artifacts }, (_, i) => (
+        <rect class="fur-solid" x={56 + i * (218 / artifacts)} y={58 + (i % 2) * 18} width={i % 3 === 0 ? 22 : 14} height={i % 2 ? 20 : 30} />
+      ))}
+      <circle cx="110" cy="146" r="11" /><circle cx="220" cy="146" r="11" />
+      <path d={ticks(318, 20, 6, 11, 16)} />
+      <!-- laboratory -->
+      <rect x="424" y="22" width="194" height="46" />
+      <circle cx="452" cy="45" r="11" /><circle cx="484" cy="45" r="6" /><circle cx="512" cy="45" r="14" /><circle cx="512" cy="45" r="5" />
+      <rect x="560" y="30" width="44" height="30" /><path d="M560 30l44 30M604 30l-44 30" />
+      <rect x="566" y="170" width="56" height="56" /><circle cx="594" cy="198" r="18" />
+      <!-- library -->
+      <rect x="672" y="20" width="264" height="20" /><path d={ticks(680, 20, 31, 8, 20)} />
+      <rect x="918" y="62" width="20" height="250" /><path d={ticks(918, 70, 29, 8, 20, true)} />
+      <rect x="716" y="130" width="130" height="76" /><circle cx="748" cy="226" r="11" /><circle cx="814" cy="226" r="11" />
+      <path d="M760 150h40v34h-40zM780 150v34" />
+      <!-- sitting room -->
+      <path d="M24 290h150v40H64v130H24z" />
+      <rect x="92" y="372" width="136" height="150" /><rect x="102" y="382" width="116" height="130" />
+      <path d="M102 382l116 130M218 382L102 512M160 382v130M102 447h116" />
+      <circle cx="204" cy="320" r="13" />
+      <!-- courtyard: a garden in four parts -->
+      <path d="M290 430H420M480 430H610M450 290V400M450 460V580" stroke-dasharray="2 5" />
+      <polygon points={s1} /><polygon points={s2} /><circle cx={fountain.x} cy={fountain.y} r="9" />
+      {[[345, 345], [555, 345], [345, 515], [555, 515]].map(([x, y]) => (
+        <g><circle cx={x} cy={y} r="32" stroke-dasharray="3 4" /><circle cx={x} cy={y} r="2" class="fur-solid" /></g>
+      ))}
+      <!-- hall -->
+      <rect x="826" y="552" width="68" height="26" /><path d={ticks(832, 552, 9, 7, 26)} />
+      <rect x="664" y="364" width="110" height="34" />
+    </g>
+  )}
+
+  <g class="plan-zones">
+    {roomSheets.map((s) => {
+      const r = rooms[s.room as keyof typeof rooms];
+      return (
+        <a href={href(s.path)} class="zone" data-room={s.room} aria-current={current === s.room ? 'page' : undefined}
+           aria-label={`${s.no} ${s.name} — ${s.label}`}>
+          <rect x={r.x} y={r.y} width={r.w} height={r.h} />
+          {full && <rect class="zone-hatch" x={r.x} y={r.y} width={r.w} height={r.h} fill="url(#hatch)" />}
+        </a>
+      );
+    })}
+  </g>
+
+  <g class="plan-walls" aria-hidden="true">
+    {walls.map((w) => <rect x={w.x} y={w.y} width={w.w} height={w.h} />)}
+  </g>
+  <g class="plan-doors" aria-hidden="true">
+    {doors.map((d) => <path d={doorPath(d)} class:list={{ front: d.front }} pathLength="1" />)}
+  </g>
+
+  {full && (
+    <g class="plan-labels" aria-hidden="true">
+      {roomSheets.map((s) => {
+        const [x, y] = labelAt[s.room];
+        return (
+          <g data-room={s.room}>
+            <text class="l-no" x={x} y={y - 22}>{s.no.replace('A-', '')}</text>
+            <text class="l-name" x={x + 26} y={y - 22}>{s.name.toUpperCase()}</text>
+            <text class="l-sub" x={x + 26} y={y}>{s.label}</text>
+          </g>
+        );
+      })}
+    </g>
+  )}
+  {full && (
+    <g class="plan-sun" data-sun aria-hidden="true">
+      <circle r="7" /><path d="M0 -13V-19M0 13V19M-13 0H-19M13 0H19M-9.2 -9.2L-13.4 -13.4M9.2 9.2L13.4 13.4M-9.2 9.2L-13.4 13.4M9.2 -9.2L13.4 -13.4" />
+    </g>
+  )}
+</svg>

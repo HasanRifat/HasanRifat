@@ -1,0 +1,125 @@
+---
+import Sheet from '../../layouts/Sheet.astro';
+import LabHead from '../../components/LabHead.astro';
+import SheetFoot from '../../components/SheetFoot.astro';
+import { site } from '../../data/site';
+---
+<Sheet room="lab" title="Sundial" subtitle="Sundial" description="Where the sun is over Los Angeles right now, computed in the browser. The routine that lights the plan on the front page.">
+  <section class="sheet">
+    <LabHead no="X-03" title="Sundial" note={`The position of the sun over ${site.place.name}, from a short astronomical-almanac routine: no API, no location request. Drag the slider to scrub through today. The grey wedge is the shadow of a post standing at the centre.`} />
+
+    <div class="dial" data-dial>
+      <svg viewBox="-220 -220 440 440" role="img" aria-label="Sundial showing the sun's direction and the shadow it casts">
+        <circle r="190" class="ring" /><circle r="120" class="ring faint" /><circle r="60" class="ring faint" />
+        {Array.from({ length: 72 }, (_, i) => (
+          <line x1="0" y1={i % 18 === 0 ? -168 : i % 6 === 0 ? -178 : -184} x2="0" y2="-190" transform={`rotate(${i * 5})`} class="tick" />
+        ))}
+        {[['N', 0, -198], ['E', 204, 5], ['S', 0, 210], ['W', -204, 5]].map(([l, x, y]) => <text x={x} y={y} text-anchor="middle" class="card">{l}</text>)}
+        <path data-track class="track" />
+        <path data-shade class="shade" />
+        <circle r="5" class="post" />
+        <g data-sunmark><circle r="9" class="sun" /><circle r="15" class="halo" /></g>
+      </svg>
+
+      <div class="read">
+        <dl class="mono">
+          <div><dt>Time in {site.place.name}</dt><dd data-o="time">—</dd></div>
+          <div><dt>Elevation</dt><dd data-o="el">—</dd></div>
+          <div><dt>Azimuth</dt><dd data-o="az">—</dd></div>
+          <div><dt>Sunrise</dt><dd data-o="rise">—</dd></div>
+          <div><dt>Sunset</dt><dd data-o="set">—</dd></div>
+          <div><dt>Daylight</dt><dd data-o="len">—</dd></div>
+        </dl>
+        <label class="mono cap scrub">
+          <span>Scrub the day</span>
+          <input type="range" min="0" max="1439" step="1" data-scrub aria-label="Minute of the day" />
+        </label>
+        <button type="button" class="mono live" data-live>Back to now</button>
+      </div>
+    </div>
+  </section>
+  <SheetFoot room="lab" />
+</Sheet>
+
+<script>
+  import { sunPosition, sunTimes, startOfDay, isDaylight, compass } from '../../lib/sun';
+  import { site } from '../../data/site';
+
+  const { lat, lon, tz } = site.place;
+  const root = document.querySelector('[data-dial]')!;
+  const o = (k: string) => root.querySelector<HTMLElement>(`[data-o="${k}"]`)!;
+  const track = root.querySelector<SVGPathElement>('[data-track]')!, shade = root.querySelector<SVGPathElement>('[data-shade]')!;
+  const mark = root.querySelector<SVGGElement>('[data-sunmark]')!;
+  const scrub = root.querySelector<HTMLInputElement>('[data-scrub]')!, liveBtn = root.querySelector<HTMLButtonElement>('[data-live]')!;
+  const hm = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
+  const rad = Math.PI / 180;
+  // Azimuth/elevation → dial: horizon on the outer ring, zenith at the centre.
+  const proj = (az: number, el: number): [number, number] => {
+    const r = 190 * (1 - Math.max(el, 0) / 90);
+    return [Math.sin(az * rad) * r, -Math.cos(az * rad) * r];
+  };
+
+  const day0 = startOfDay(new Date(), tz);
+  const { rise, set } = sunTimes(day0, lat, lon);
+  let d = '';
+  for (let m = 0; m <= 1440; m += 5) {
+    const s = sunPosition(new Date(day0.getTime() + m * 60000), lat, lon);
+    if (!isDaylight(s.elevation)) continue;
+    const [x, y] = proj(s.azimuth, s.elevation);
+    d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+  }
+  track.setAttribute('d', d);
+  o('rise').textContent = rise ? hm.format(rise) : '—';
+  o('set').textContent = set ? hm.format(set) : '—';
+  if (rise && set) { const mins = Math.round((set.getTime() - rise.getTime()) / 60000); o('len').textContent = `${Math.floor(mins / 60)} h ${String(mins % 60).padStart(2, '0')} min`; }
+
+  let live = true;
+  function draw(t: Date) {
+    const s = sunPosition(t, lat, lon);
+    const up = isDaylight(s.elevation);
+    const [x, y] = proj(s.azimuth, s.elevation);
+    mark.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+    mark.classList.toggle('down', !up);
+    o('time').textContent = hm.format(t);
+    o('el').textContent = `${s.elevation.toFixed(1)}°${up ? '' : ' (below the horizon)'}`;
+    o('az').textContent = `${s.azimuth.toFixed(1)}° ${compass(s.azimuth)}`;
+    if (up) {
+      // shadow of a unit post: opposite the sun, length = cot(elevation)
+      const len = Math.min(190, 26 / Math.tan(Math.max(s.elevation, 1) * rad));
+      const a = (s.azimuth + 180) * rad, w = 0.05;
+      const pt = (ang: number, r: number) => `${(Math.sin(ang) * r).toFixed(1)} ${(-Math.cos(ang) * r).toFixed(1)}`;
+      shade.setAttribute('d', `M${pt(a + Math.PI / 2, 5)}L${pt(a - w, len)}L${pt(a + w, len)}L${pt(a - Math.PI / 2, 5)}Z`);
+    } else shade.setAttribute('d', '');
+    liveBtn.hidden = live;
+  }
+  const now = () => { const t = new Date(); scrub.value = String(Math.floor((t.getTime() - day0.getTime()) / 60000) % 1440); draw(t); };
+  scrub.addEventListener('input', () => { live = false; draw(new Date(day0.getTime() + Number(scrub.value) * 60000)); });
+  liveBtn.addEventListener('click', () => { live = true; now(); });
+  now();
+  setInterval(() => live && now(), 15000);
+</script>
+
+<style>
+  .dial { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(15rem, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; border-top: 1px solid var(--ink); padding-top: 2rem; }
+  svg { width: 100%; max-width: 34rem; height: auto; overflow: visible; justify-self: center; }
+  .ring { fill: none; stroke: var(--ink); stroke-width: 1; }
+  .faint { stroke: var(--line); stroke-dasharray: 2 5; }
+  .tick { stroke: var(--graphite); stroke-width: 0.8; }
+  .card { font: 500 12px var(--mono); fill: var(--graphite); }
+  .track { fill: none; stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 1 5; stroke-linecap: round; }
+  .shade { fill: var(--ink); opacity: 0.22; }
+  .post { fill: var(--ink); }
+  .sun { fill: var(--accent); }
+  .halo { fill: none; stroke: var(--accent); stroke-width: 1; opacity: 0.5; }
+  :global(.down) .sun { fill: none; stroke: var(--graphite); }
+  :global(.down) .halo { display: none; }
+  .read { display: grid; gap: 1.5rem; }
+  .read dl div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.7rem 0; border-top: 1px solid var(--hair); }
+  .read dt { text-transform: uppercase; letter-spacing: 0.12em; color: var(--graphite); font-size: 0.62rem; }
+  .read dd { font-variant-numeric: tabular-nums; font-size: 0.82rem; text-align: right; }
+  .scrub { display: grid; gap: 0.7rem; }
+  input[type='range'] { width: 100%; accent-color: var(--accent); }
+  .live { justify-self: start; border: 1px solid var(--ink); padding: 0.55rem 0.9rem; text-transform: uppercase; letter-spacing: 0.12em; }
+  .live:hover { background: var(--ink); color: var(--paper); }
+  @media (max-width: 760px) { .dial { grid-template-columns: 1fr; } }
+</style>

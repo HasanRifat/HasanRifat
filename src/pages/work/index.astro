@@ -1,0 +1,103 @@
+---
+import Sheet from '../../layouts/Sheet.astro';
+import SheetHead from '../../components/SheetHead.astro';
+import SheetFoot from '../../components/SheetFoot.astro';
+import Figure from '../../components/Figure.astro';
+import Door from '../../components/Door.astro';
+import { getCollection } from 'astro:content';
+import { href } from '../../lib/url';
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const no = (i: number) => String(i + 1).padStart(2, '0');
+---
+<Sheet room="workshop" title="Work" description="Things Rifat Hasan has built or is building: a halal poultry business, personal systems, an Arabic curriculum, and internal tools for Los Angeles County.">
+  <section class="sheet">
+    <SheetHead no="A-03" label="Work" title="Workshop" standfirst="Things on the bench. Some finished, most not, one behind a locked door." />
+
+    <div class="work" data-work>
+      <ol class="rows">
+        {projects.map((p, i) => (
+          <li>
+            <a class="row" href={href(`/work/${p.id}/`)} data-i={i}>
+              <span class="mono row-no">{no(i)}</span>
+              <span class="row-fig"><Figure kind={p.data.figure} /></span>
+              <span class="row-main">
+                <span class="row-title">{p.data.title}{p.data.arabic && <span class="ar" lang="ar">{p.data.arabic}</span>}</span>
+                <span class="row-sum">{p.data.summary}</span>
+              </span>
+              <span class="mono cap row-meta"><span>{p.data.kind}</span><span>{p.data.status}</span></span>
+              <Door size={20} class="row-door" />
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <div class="board" aria-hidden="true">
+        <div class="board-in">
+          {projects.map((p, i) => (
+            <figure class:list={['plate', { 'is-on': i === 0 }]} data-i={i}>
+              <Figure kind={p.data.figure} />
+              <figcaption class="mono cap"><b>Fig. {no(i)}</b> {p.data.title} — schematic, not a screenshot</figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+  <SheetFoot room="workshop" />
+</Sheet>
+
+<script>
+  const work = document.querySelector('[data-work]');
+  if (work) {
+    const plates = work.querySelectorAll('.plate');
+    const show = (i: string) => plates.forEach((p) => p.classList.toggle('is-on', (p as HTMLElement).dataset.i === i));
+    work.querySelectorAll<HTMLElement>('.row').forEach((r) => {
+      r.addEventListener('pointerenter', () => show(r.dataset.i!));
+      r.addEventListener('focus', () => show(r.dataset.i!));
+    });
+  }
+</script>
+
+<style>
+  .work { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .rows { border-top: 1px solid var(--ink); }
+  .row {
+    display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; gap: 0.4rem 1rem; align-items: baseline;
+    padding: 1.7rem 0 1.6rem; border-bottom: 1px solid var(--line); text-decoration: none; position: relative;
+    transition: padding 0.45s var(--ease);
+  }
+  .row-no { color: var(--accent); }
+  .row-fig { display: none; }
+  .row-main { display: grid; gap: 0.6rem; }
+  .row-title {
+    font: 300 clamp(1.9rem, 4.2vw, 3.6rem)/1 var(--serif); font-variation-settings: 'opsz' 144; letter-spacing: -0.03em;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.1em 0.5em; color: var(--ink); transition: color 0.3s;
+  }
+  .row-title .ar { font-size: 0.62em; color: var(--graphite); }
+  .row-sum { max-width: 46ch; font-size: 0.95rem; line-height: 1.5; color: var(--graphite); }
+  .row-meta { grid-column: 2; display: flex; flex-wrap: wrap; gap: 0.3rem 1.4rem; font-size: 0.62rem; }
+  .row-meta span + span::before { content: '/'; margin-right: 1.4rem; color: var(--line); }
+  .row :global(.row-door) { grid-row: 1; grid-column: 3; color: var(--graphite); align-self: center; }
+  .row:hover, .row:focus-visible { padding-left: 0.9rem; }
+  .row:hover .row-title, .row:focus-visible .row-title { color: var(--accent); font-style: italic; }
+  .row:hover .row-sum { color: var(--ink); }
+
+  .board { position: sticky; top: 2rem; }
+  .board-in { position: relative; aspect-ratio: 4 / 3.3; border: 1px solid var(--line); background: var(--paper-2); }
+  .board-in::before, .board-in::after { content: ''; position: absolute; width: 14px; height: 14px; border: 1px solid var(--accent); }
+  .board-in::before { left: -1px; top: -1px; border-right: 0; border-bottom: 0; }
+  .board-in::after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+  .plate { position: absolute; inset: 0; padding: 7% 7% 3.2rem; opacity: 0; transform: scale(0.97); transition: opacity 0.45s var(--ease), transform 0.6s var(--ease); display: grid; place-items: center; }
+  .plate.is-on { opacity: 1; transform: none; }
+  .plate figcaption { position: absolute; left: 1rem; right: 1rem; bottom: 0.9rem; font-size: 0.6rem; }
+
+  @media (max-width: 1180px) {
+    .work { grid-template-columns: 1fr; }
+    .board { display: none; }
+    .row { grid-template-columns: 2.2rem minmax(0, 1fr) auto; }
+    .row-fig { display: block; grid-column: 2 / -1; grid-row: 2; max-width: 22rem; border: 1px solid var(--line); background: var(--paper-2); padding: 1rem; margin: 0.6rem 0; }
+    .row-main { grid-column: 2 / -1; grid-row: 3; }
+    .row-meta { grid-row: 1; grid-column: 2; }
+    .row :global(.row-door) { grid-row: 1; }
+  }
+</style>

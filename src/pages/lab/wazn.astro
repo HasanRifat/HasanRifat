@@ -1,0 +1,110 @@
+---
+import Sheet from '../../layouts/Sheet.astro';
+import LabHead from '../../components/LabHead.astro';
+import SheetFoot from '../../components/SheetFoot.astro';
+---
+<Sheet room="lab" title="Wazn machine" subtitle="Wazn machine" description="Pour a three-letter Arabic root into the standard Form I patterns and watch the letters take their places.">
+  <section class="sheet">
+    <LabHead no="X-02" title="Wazn machine" note="Arabic builds words by pouring a three-letter root into a pattern (a wazn, literally a weight or measure). Pick a root. The red letters are the root; everything else is the mould." />
+
+    <div class="wazn" data-wazn>
+      <div class="roots" role="group" aria-label="Root"></div>
+      <p class="root-line"><span class="ar root-big" lang="ar" data-root></span><span class="mono cap" data-gloss></span></p>
+      <ol class="forms" aria-live="polite"></ol>
+      <p class="mono cap fine">Form I, sound roots only. The middle vowel of the past and present is a property of each verb and is stored per root, not derived.</p>
+    </div>
+  </section>
+  <SheetFoot room="lab" />
+</Sheet>
+
+<script>
+  // [root letters, gloss, past middle vowel, present middle vowel]
+  const A = 'َ', I = 'ِ', U = 'ُ', S = 'ْ';
+  const ROOTS: [string, string, string, string][] = [
+    ['كتب', 'writing', A, U], ['علم', 'knowing', I, A], ['درس', 'studying', A, U], ['فتح', 'opening', A, A],
+    ['نصر', 'helping', A, U], ['حمد', 'praising', I, A], ['حفظ', 'preserving, memorising', I, A],
+    ['سمع', 'hearing', I, A], ['خلق', 'creating', A, U], ['ذكر', 'remembering, mentioning', A, U],
+  ];
+  type Piece = [string, boolean]; // [text, isRootLetter]
+  const forms = (f: string, a: string, l: string, pv: string, mv: string): { name: string; tr: string; sense: string; parts: Piece[] }[] => [
+    { name: 'الماضي', tr: 'Past', sense: 'he did', parts: [[f, true], [A, false], [a, true], [pv, false], [l, true], [A, false]] },
+    { name: 'المضارع', tr: 'Present', sense: 'he does', parts: [['يَ', false], [f, true], [S, false], [a, true], [mv, false], [l, true], [U, false]] },
+    { name: 'الأمر', tr: 'Command', sense: 'do!', parts: [['ا' + (mv === U ? U : I), false], [f, true], [S, false], [a, true], [mv, false], [l, true], [S, false]] },
+    { name: 'اسم الفاعل', tr: 'Active participle', sense: 'the one doing', parts: [[f, true], [A + 'ا', false], [a, true], [I, false], [l, true]] },
+    { name: 'اسم المفعول', tr: 'Passive participle', sense: 'the thing done', parts: [['مَ', false], [f, true], [S, false], [a, true], [U + 'و', false], [l, true]] },
+  ];
+
+  const box = document.querySelector('[data-wazn]')!;
+  const rootsEl = box.querySelector('.roots')!, list = box.querySelector('.forms')!;
+  const rootEl = box.querySelector('[data-root]')!, glossEl = box.querySelector('[data-gloss]')!;
+
+  function show(i: number) {
+    const [r, gloss, pv, mv] = ROOTS[i];
+    const [f, a, l] = [...r];
+    rootEl.textContent = `${f} ${a} ${l}`;
+    glossEl.textContent = `the root of ${gloss}`;
+    rootsEl.querySelectorAll('button').forEach((b, j) => b.setAttribute('aria-pressed', String(i === j)));
+    list.replaceChildren(...forms(f, a, l, pv, mv).map((form, n) => {
+      const li = document.createElement('li');
+      li.style.setProperty('--n', String(n));
+      const word = document.createElement('span');
+      word.className = 'ar word'; word.lang = 'ar';
+      // Diacritics must stay attached to their base letter, so group each
+      // letter with the marks that follow it before wrapping.
+      let k = 0;
+      for (const [text, isRoot] of form.parts) {
+        if (/^[ً-ْ]/.test(text) && word.lastElementChild) {
+          const m = text.match(/^[ً-ْ]+/)![0];
+          word.lastElementChild.textContent += m;
+          if (text.length > m.length) { const s = document.createElement('span'); s.textContent = text.slice(m.length); word.append(s); }
+          continue;
+        }
+        const s = document.createElement('span');
+        s.textContent = text;
+        if (isRoot) { s.className = 'r'; s.style.setProperty('--k', String(k++)); }
+        word.append(s);
+      }
+      li.innerHTML = `<span class="mono cap meta"><b>${form.tr}</b><span class="ar" lang="ar">${form.name}</span></span>`;
+      li.append(word);
+      const sense = document.createElement('span');
+      sense.className = 'sense'; sense.textContent = form.sense;
+      li.append(sense);
+      return li;
+    }));
+  }
+  ROOTS.forEach(([r], i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'ar'; b.lang = 'ar'; b.textContent = r;
+    b.setAttribute('aria-label', `Root ${[...r].join(' ')} — ${ROOTS[i][1]}`);
+    b.addEventListener('click', () => show(i));
+    rootsEl.append(b);
+  });
+  show(0);
+</script>
+
+<style>
+  .wazn { display: grid; gap: 2rem; }
+  .roots { display: flex; flex-wrap: wrap; direction: rtl; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .roots :global(button) { font-size: 1.7rem; line-height: 1; padding: 0.9rem 1.2rem 1.1rem; border-left: 1px solid var(--line); }
+  .roots :global(button:hover) { color: var(--accent); }
+  .roots :global(button[aria-pressed='true']) { background: var(--ink); color: var(--paper); }
+  .root-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 2rem; }
+  .root-big { font-size: clamp(4rem, 13vw, 9rem); line-height: 1.1; color: var(--accent); }
+  .forms { display: grid; }
+  .forms :global(li) {
+    display: grid; grid-template-columns: 11rem minmax(0, 1fr) 10rem; align-items: center; gap: 1rem;
+    border-top: 1px solid var(--line); padding: 0.6rem 0 1rem;
+  }
+  .forms :global(.meta) { display: grid; gap: 0.2rem; }
+  .forms :global(.meta .ar) { font-size: 1.15rem; text-transform: none; letter-spacing: 0; direction: rtl; text-align: left; }
+  .forms :global(.word) { font-size: clamp(2.6rem, 7vw, 4.6rem); line-height: 1.5; text-align: right; }
+  .forms :global(.word .r) { color: var(--accent); }
+  .forms :global(.sense) { font: italic 300 1.25rem var(--serif); color: var(--graphite); text-align: right; }
+  @media (prefers-reduced-motion: no-preference) {
+    .forms :global(li) { animation: rise 0.6s calc(var(--n) * 0.06s) var(--ease) both; }
+  }
+  @media (max-width: 640px) {
+    .forms :global(li) { grid-template-columns: 1fr auto; }
+    .forms :global(.sense) { grid-column: 1 / -1; text-align: left; }
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import SheetHead from '../components/SheetHead.astro';
+import SheetFoot from '../components/SheetFoot.astro';
+import now from '../data/now.json';
+const beds = [
+  { key: 'building', label: 'Building', items: now.building },
+  { key: 'learning', label: 'Learning', items: now.learning },
+  { key: 'exploring', label: 'Exploring', items: now.exploring },
+  { key: 'toward', label: 'Working toward', items: now.toward },
+];
+const updated = new Date(now.updated + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+<Sheet room="courtyard" title="Now" description="What currently has Rifat Hasan's attention: what he is building, learning, exploring and working toward.">
+  <section class="sheet">
+    <SheetHead no="A-06" label="Now" title="Courtyard" standfirst="The one room open to the sky, so it changes. A garden in four beds." />
+
+    <div class="garden">
+      {beds.map((b, i) => (
+        <section class="bed" style={`--i:${i}`}>
+          <h2 class="mono cap"><b>{String(i + 1).padStart(2, '0')}</b> {b.label}</h2>
+          <ul>
+            {b.items.map((it) => (
+              <li><span class="t">{it.title}</span><span class="n">{it.note}</span></li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      <div class="fountain" aria-hidden="true">
+        <svg viewBox="-50 -50 100 100"><rect x="-30" y="-30" width="60" height="60" /><rect x="-30" y="-30" width="60" height="60" transform="rotate(45)" /><circle r="10" /></svg>
+      </div>
+    </div>
+
+    <p class="mono cap stamp">Last tended <time datetime={now.updated}>{updated}</time> · <span data-daylight>Los Angeles</span></p>
+  </section>
+  <SheetFoot room="courtyard" />
+</Sheet>
+
+<script>
+  import { sunTimes, startOfDay } from '../lib/sun';
+  import { site } from '../data/site';
+  const el = document.querySelector('[data-daylight]');
+  if (el) {
+    const { lat, lon, tz } = site.place;
+    const { rise, set } = sunTimes(startOfDay(new Date(), tz), lat, lon);
+    const f = new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false });
+    if (rise && set) el.textContent = `Daylight in Los Angeles today ${f.format(rise)} – ${f.format(set)}`;
+  }
+</script>
+
+<style>
+  .garden { position: relative; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--ink); }
+  .bed { padding: clamp(1.4rem, 3.5vw, 3rem); min-height: 17rem; display: grid; align-content: start; gap: 1.6rem; }
+  .bed:nth-child(odd) { border-right: 1px dashed var(--line); }
+  .bed:nth-child(-n + 2) { border-bottom: 1px dashed var(--line); }
+  .bed:nth-child(2), .bed:nth-child(4) { padding-left: clamp(2rem, 5vw, 4.5rem); }
+  .bed:nth-child(n + 3) { padding-top: clamp(2.4rem, 5vw, 4.5rem); }
+  .bed ul { display: grid; gap: 1.4rem; }
+  .bed li { display: grid; gap: 0.3rem; }
+  .t { font: 300 clamp(1.6rem, 2.9vw, 2.5rem)/1.02 var(--serif); font-variation-settings: 'opsz' 144; letter-spacing: -0.025em; }
+  .n { color: var(--graphite); font-size: 0.95rem; line-height: 1.45; max-width: 34ch; }
+  .fountain { position: absolute; left: 50%; top: 50%; width: 5.5rem; translate: -50% -50%; background: var(--paper); border-radius: 50%; padding: 0.4rem; transition: background-color 0.6s var(--ease); }
+  .fountain svg { display: block; overflow: visible; }
+  .fountain svg * { fill: none; stroke: var(--accent); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+  .stamp { margin-top: 1.2rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    .bed > * { animation: rise 0.9s calc(var(--i) * 0.1s + 0.25s) var(--ease) both; }
+    .fountain svg { animation: turn 90s linear infinite; }
+  }
+  @keyframes turn { to { transform: rotate(360deg); } }
+  @media (max-width: 700px) {
+    .garden { grid-template-columns: 1fr; }
+    .bed { border-right: 0 !important; border-bottom: 1px dashed var(--line); padding: 1.6rem 1.2rem !important; min-height: 0; }
+    .bed:last-of-type { border-bottom: 0; }
+    .fountain { display: none; }
+  }
+</style>

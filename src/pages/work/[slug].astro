@@ -1,0 +1,72 @@
+---
+import Sheet from '../../layouts/Sheet.astro';
+import Figure from '../../components/Figure.astro';
+import Door from '../../components/Door.astro';
+import { getCollection, render } from 'astro:content';
+import { href } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return all.map((entry, i) => ({ params: { slug: entry.id }, props: { entry, i, next: all[(i + 1) % all.length] } }));
+}
+const { entry, i, next } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const no = String(i + 1).padStart(2, '0');
+---
+<Sheet room="workshop" title={d.title} description={d.summary} subtitle={d.title}>
+  <article class="sheet">
+    <header class="sheet-head">
+      <p class="mono cap eyebrow"><b>A-03.{no}</b><a href={href('/work/')}>Workshop</a><span>{d.kind}</span></p>
+      <h1 class="display">{d.title}</h1>
+      {d.arabic && <p class="ar big" lang="ar">{d.arabic}</p>}
+      <p class="standfirst">{d.summary}</p>
+    </header>
+
+    <div class="case">
+      <aside class="spec">
+        <figure class="plate">
+          <Figure kind={d.figure} />
+          <figcaption class="mono cap"><b>Fig. {no}</b> Schematic, not a screenshot</figcaption>
+        </figure>
+        <dl class="mono">
+          <div><dt>Status</dt><dd>{d.status}</dd></div>
+          {d.period && <div><dt>Period</dt><dd>{d.period}</dd></div>}
+          <div><dt>Role</dt><dd>{d.role}</dd></div>
+          {d.stack.length > 0 && <div><dt>Made with</dt><dd>{d.stack.join(' · ')}</dd></div>}
+          <div><dt>Links</dt><dd>
+            {d.links.length > 0
+              ? d.links.map((l) => <a href={l.url} rel="noopener">{l.label} ↗</a>)
+              : <span class="none">None public</span>}
+          </dd></div>
+        </dl>
+      </aside>
+      <div class="prose"><Content /></div>
+    </div>
+  </article>
+
+  <footer class="sheet-foot">
+    <a class="through" href={href(`/work/${next.id}/`)}>
+      <span class="mono cap">Next on the bench</span>
+      <span class="through-name">{next.data.title}<Door size={28} /></span>
+    </a>
+    <p class="mono cap fine"><a href={href('/work/')}>← All work</a></p>
+  </footer>
+</Sheet>
+
+<style>
+  .eyebrow a { text-decoration: none; }
+  .big { font-size: clamp(2rem, 5vw, 3.6rem); line-height: 1; color: var(--accent); margin-top: -0.6rem; text-align: left; direction: ltr; }
+  .case { display: grid; grid-template-columns: minmax(16rem, 24rem) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .spec { position: sticky; top: 2rem; display: grid; gap: 1.5rem; }
+  .plate { border: 1px solid var(--line); background: var(--paper-2); padding: 1.5rem 1.5rem 1rem; }
+  .plate figcaption { margin-top: 1rem; font-size: 0.6rem; }
+  .spec dl div { display: grid; grid-template-columns: 6rem 1fr; gap: 0.5rem; padding: 0.6rem 0; border-top: 1px solid var(--hair); line-height: 1.5; }
+  .spec dt { text-transform: uppercase; letter-spacing: 0.12em; color: var(--graphite); font-size: 0.62rem; }
+  .spec dd a { display: block; }
+  .none { color: var(--graphite); }
+  @media (max-width: 820px) {
+    .case { grid-template-columns: 1fr; }
+    .spec { position: static; }
+  }
+</style>

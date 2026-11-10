@@ -1,0 +1,131 @@
+---
+import '@fontsource-variable/fraunces/opsz.css';
+import '@fontsource-variable/fraunces/opsz-italic.css';
+import '@fontsource-variable/hanken-grotesk';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/500.css';
+import '@fontsource/amiri/arabic-400.css';
+import '../styles/global.css';
+import frauncesUrl from '@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2?url';
+import frauncesItalicUrl from '@fontsource-variable/fraunces/files/fraunces-latin-opsz-italic.woff2?url';
+import Plan from '../components/Plan.astro';
+import Door from '../components/Door.astro';
+import { site } from '../data/site';
+import { sheets, sheetFor, type RoomKey } from '../data/sheets';
+import { sunPosition } from '../lib/sun';
+import { href } from '../lib/url';
+
+interface Props { room: RoomKey; title?: string; description?: string; subtitle?: string }
+const { room, title, description = site.description, subtitle } = Astro.props;
+const sheet = sheetFor(room);
+const pageTitle = title ? `${title} — ${site.name}` : site.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const og = new URL(href('/og.png'), Astro.site);
+const { lat, lon } = site.place;
+const themeInit = `(function(){var d=document.documentElement,s=null;try{s=localStorage.getItem('light')}catch(e){}
+var sun=${sunPosition.toString()};
+d.dataset.light=s==='day'||s==='night'?s:'auto';
+d.dataset.theme=d.dataset.light!=='auto'?d.dataset.light:(sun(new Date(),${lat},${lon}).elevation>-0.833?'day':'night');
+try{if(localStorage.getItem('grid')==='1')d.dataset.grid='1'}catch(e){}})()`;
+const jsonLd = {
+  '@context': 'https://schema.org', '@type': 'Person', name: site.name, url: new URL(href('/'), Astro.site).href,
+  jobTitle: site.role, worksFor: { '@type': 'Organization', name: site.employer }, sameAs: site.links.map((l) => l.url),
+};
+---
+<!doctype html>
+<html lang="en" data-theme="day">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+    <link rel="sitemap" href={href('/sitemap.xml')} />
+    <link rel="preload" as="font" type="font/woff2" href={frauncesUrl} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={frauncesItalicUrl} crossorigin />
+    <meta name="theme-color" content="#EEE8DB" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={og} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline set:html={themeInit} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body data-room={room}>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <main id="main"><slot /></main>
+
+    <aside class="rail" data-rail>
+      <div class="rail-bar">
+        <a class="mark" href={href('/')} aria-label={`${site.name} — back to the plan`}>
+          <Door size={18} /><span>{site.name}</span>
+        </a>
+        <span class="rail-here mono"><b>{sheet.no}</b> {subtitle ?? sheet.name}</span>
+        <button class="rail-toggle mono" type="button" data-rail-toggle aria-expanded="false" aria-controls="rail-panel">
+          <span data-rail-label>Sheets</span>
+        </button>
+      </div>
+
+      <div class="rail-panel" id="rail-panel">
+        {room !== 'plan' && (
+          <div class="keyplan">
+            <Plan mode="key" current={room} />
+            <p class="mono cap">Key plan</p>
+          </div>
+        )}
+
+        <nav aria-label="Sheets">
+          <ol class="sheets">
+            {sheets.map((s, i) => (
+              <li>
+                <a href={href(s.path)} data-room={s.room} aria-current={s.room === room ? 'page' : undefined}>
+                  <span class="mono no">{s.no}</span>
+                  <span class="nm">{s.name}</span>
+                  <span class="mono lb">{s.label}</span>
+                  <kbd class="mono" aria-hidden="true">{i + 1}</kbd>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+
+        <dl class="block mono">
+          <div><dt>{site.place.name}</dt><dd><time data-clock>--:--:--</time></dd></div>
+          <div><dt>Light</dt><dd data-light-status>—</dd></div>
+          <div class="block-btns">
+            <button type="button" data-light-btn title="Cycle: follow the sun / day / night (N)">Auto</button>
+            <button type="button" data-grid-btn aria-pressed="false" title="Construction grid (G)">Grid</button>
+            <button type="button" data-legend-btn title="Legend (?)" aria-haspopup="dialog">Legend</button>
+          </div>
+        </dl>
+      </div>
+    </aside>
+
+    <dialog class="legend" data-legend aria-labelledby="legend-h">
+      <form method="dialog">
+        <p class="mono cap" id="legend-h">Legend</p>
+        <dl class="mono">
+          <div><dt><kbd>1</kbd>–<kbd>7</kbd></dt><dd>Go to a sheet</dd></div>
+          <div><dt><kbd>N</kbd></dt><dd>Light: follow the sun, day, night</dd></div>
+          <div><dt><kbd>G</kbd></dt><dd>Construction grid</dd></div>
+          <div><dt><kbd>?</kbd></dt><dd>This legend</dd></div>
+        </dl>
+        <p class="legend-note">By default the house keeps Los Angeles time: daylight when the sun is up there, lamplight when it isn't. On the plan, the shadows fall where they would.</p>
+        <p class="legend-note legend-q">
+          <svg viewBox="-20 -20 40 40" width="34" height="34" aria-hidden="true">
+            <circle r="17" /><path d="M0 14V-14M-4 -9L0 -15L4 -9" /><path class="q" d="M0 0L6.9 -15.6" />
+          </svg>
+          <span>North is up. The red tick is the qibla from Los Angeles, about 24° east of north.</span>
+        </p>
+        <button class="mono" value="close">Close <kbd>Esc</kbd></button>
+      </form>
+    </dialog>
+
+    <div class="toast mono" data-toast role="status" aria-live="polite"></div>
+    <script>import '../scripts/site.ts';</script>
+  </body>
+</html>

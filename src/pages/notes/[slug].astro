@@ -1,0 +1,31 @@
+---
+import Sheet from '../../layouts/Sheet.astro';
+import { getCollection, render } from 'astro:content';
+import { href } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const all = await getCollection('notes', (n) => !n.data.draft);
+  return all.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const iso = d.date.toISOString().slice(0, 10);
+---
+<Sheet room="library" title={d.title} description={d.summary} subtitle={d.title}>
+  <article class="sheet note">
+    <header class="sheet-head">
+      <p class="mono cap eyebrow"><b>A-05</b><a href={href('/notes/')}>Library</a><span>{d.category}</span><time datetime={iso}>{iso}</time></p>
+      <h1 class="display">{d.title}</h1>
+      <p class="standfirst">{d.summary}</p>
+    </header>
+    <div class="prose"><Content /></div>
+    <p class="mono cap back"><a href={href('/notes/')}>← Back to the shelves</a></p>
+  </article>
+</Sheet>
+
+<style>
+  .eyebrow a { text-decoration: none; }
+  .note .prose { margin-left: clamp(0rem, 14vw, 13rem); font-size: 1.1rem; }
+  .back { margin: 5rem 0 0 clamp(0rem, 14vw, 13rem); }
+</style>

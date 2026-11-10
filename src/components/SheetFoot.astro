@@ -1,0 +1,16 @@
+---
+import Door from './Door.astro';
+import { sheets, type RoomKey } from '../data/sheets';
+import { site } from '../data/site';
+import { href } from '../lib/url';
+const { room } = Astro.props as { room: RoomKey };
+const i = sheets.findIndex((s) => s.room === room);
+const next = sheets[(i + 1) % sheets.length];
+---
+<footer class="sheet-foot">
+  <a class="through" href={href(next.path)}>
+    <span class="mono cap">Next door · {next.no}</span>
+    <span class="through-name">{next.name}<Door size={28} /></span>
+  </a>
+  <p class="mono cap fine">© {new Date().getFullYear()} {site.name} · Drawn in code, lit by the sun · <a href={href('/notes/colophon/')}>Colophon</a></p>
+</footer>

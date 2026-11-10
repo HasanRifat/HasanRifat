@@ -1,0 +1,129 @@
+---
+import Sheet from '../../layouts/Sheet.astro';
+import LabHead from '../../components/LabHead.astro';
+import SheetFoot from '../../components/SheetFoot.astro';
+---
+<Sheet room="lab" title="Light study" subtitle="Light study" description="Draw walls and carry a lamp through them: the shadow engine behind the plan on the front page.">
+  <section class="sheet">
+    <LabHead no="X-01" title="Light study" note="Press and drag to draw a wall. Move without pressing to carry the lamp. Each wall's shadow is the convex hull of the wall and a copy of itself pushed away from the light, which is about forty lines of code and looks like more." />
+
+    <div class="study">
+      <svg data-study viewBox="0 0 960 560" role="application" aria-label="Wall drawing surface. Use the buttons below to change the layout if you cannot draw." tabindex="0" data-keys-off>
+        <defs>
+          <pattern id="g24" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" class="gl" /></pattern>
+          <radialGradient id="lamp"><stop offset="0" stop-color="var(--glow)" stop-opacity="var(--glow-a)" /><stop offset="1" stop-color="var(--glow)" stop-opacity="0" /></radialGradient>
+        </defs>
+        <rect width="960" height="560" fill="url(#g24)" />
+        <circle data-glow r="300" fill="url(#lamp)" />
+        <path data-shadow class="plan-shadow" />
+        <g data-walls class="plan-walls"></g>
+        <rect data-ghost class="ghost" width="0" height="0" />
+        <circle data-lamp r="6" class="lamp" />
+      </svg>
+      <div class="controls mono">
+        <button type="button" data-act="undo">Undo wall</button>
+        <button type="button" data-act="clear">Clear</button>
+        <button type="button" data-act="house">A small house</button>
+        <button type="button" data-act="maze">A colonnade</button>
+        <span data-count class="count">0 walls</span>
+      </div>
+    </div>
+  </section>
+  <SheetFoot room="lab" />
+</Sheet>
+
+<script>
+  import { shadowPath, toSvg } from '../../scripts/shadow';
+  import type { Rect } from '../../lib/plan';
+
+  const svg = document.querySelector<SVGSVGElement>('[data-study]')!;
+  const q = <T extends SVGElement>(s: string) => svg.querySelector<T>(s)!;
+  const shadow = q<SVGPathElement>('[data-shadow]'), wallsG = q<SVGGElement>('[data-walls]');
+  const ghost = q<SVGRectElement>('[data-ghost]'), lamp = q<SVGCircleElement>('[data-lamp]'), glow = q<SVGCircleElement>('[data-glow]');
+  const count = document.querySelector('[data-count]')!;
+  const G = 24, T = 12;
+  const snap = (n: number) => Math.round(n / G) * G;
+
+  const presets: Record<string, Rect[]> = {
+    house: [
+      [240, 120, 480, T], [240, 120, T, 150], [240, 342, T, 110], [240, 440, 200, T], [520, 440, 212, T],
+      [720, 120, T, 332], [480, 120, T, 130], [480, 330, T, 122], [252, 270, 120, T],
+    ].map(([x, y, w, h]) => ({ x, y, w, h })),
+    maze: Array.from({ length: 28 }, (_, i) => ({ x: 168 + (i % 7) * 96, y: 108 + Math.floor(i / 7) * 96, w: 24, h: 24 })),
+  };
+  let walls: Rect[] = presets.house.slice();
+  let light = { x: 420, y: 300 };
+  let start: [number, number] | null = null;
+
+  const rectFrom = (a: [number, number], b: [number, number]): Rect => {
+    const horizontal = Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]);
+    const x1 = snap(a[0]), y1 = snap(a[1]);
+    return horizontal
+      ? { x: Math.min(x1, snap(b[0])), y: y1 - T / 2, w: Math.max(Math.abs(snap(b[0]) - x1), T), h: T }
+      : { x: x1 - T / 2, y: Math.min(y1, snap(b[1])), w: T, h: Math.max(Math.abs(snap(b[1]) - y1), T) };
+  };
+  const setRect = (el: SVGElement, r: Rect) => {
+    el.setAttribute('x', String(r.x)); el.setAttribute('y', String(r.y));
+    el.setAttribute('width', String(r.w)); el.setAttribute('height', String(r.h));
+  };
+  const render = () => {
+    wallsG.replaceChildren(...walls.map((w) => {
+      const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      setRect(r, w); return r;
+    }));
+    count.textContent = `${walls.length} wall${walls.length === 1 ? '' : 's'}`;
+    draw();
+  };
+  const draw = () => {
+    shadow.setAttribute('d', shadowPath(walls, light.x, light.y, 1.5));
+    for (const el of [lamp, glow]) { el.setAttribute('cx', String(light.x)); el.setAttribute('cy', String(light.y)); }
+  };
+
+  svg.addEventListener('pointerdown', (e) => {
+    start = toSvg(svg, e.clientX, e.clientY);
+    svg.setPointerCapture(e.pointerId);
+  });
+  svg.addEventListener('pointermove', (e) => {
+    const p = toSvg(svg, e.clientX, e.clientY);
+    if (start) { setRect(ghost, rectFrom(start, p)); ghost.style.opacity = '1'; }
+    else { light = { x: p[0], y: p[1] }; draw(); }
+  });
+  const end = (e: PointerEvent) => {
+    if (!start) return;
+    const p = toSvg(svg, e.clientX, e.clientY);
+    const moved = Math.hypot(p[0] - start[0], p[1] - start[1]) > 10;
+    if (moved) walls.push(rectFrom(start, p)); else light = { x: p[0], y: p[1] };
+    start = null; ghost.style.opacity = '0';
+    render();
+  };
+  svg.addEventListener('pointerup', end);
+  svg.addEventListener('pointercancel', () => { start = null; ghost.style.opacity = '0'; });
+  // keyboard: arrows carry the lamp
+  svg.addEventListener('keydown', (e) => {
+    const d: Record<string, [number, number]> = { ArrowLeft: [-G, 0], ArrowRight: [G, 0], ArrowUp: [0, -G], ArrowDown: [0, G] };
+    if (!d[e.key]) return;
+    e.preventDefault();
+    light = { x: Math.max(0, Math.min(960, light.x + d[e.key][0])), y: Math.max(0, Math.min(560, light.y + d[e.key][1])) };
+    draw();
+  });
+  document.querySelectorAll<HTMLButtonElement>('[data-act]').forEach((b) => b.addEventListener('click', () => {
+    const a = b.dataset.act!;
+    if (a === 'undo') walls.pop();
+    else if (a === 'clear') walls = [];
+    else walls = presets[a].slice();
+    render();
+  }));
+  render();
+</script>
+
+<style>
+  .study { border: 1px solid var(--ink); }
+  svg { display: block; width: 100%; height: auto; touch-action: none; cursor: crosshair; background: var(--paper-2); }
+  svg :global(.gl) { fill: none; stroke: var(--hair); stroke-width: 1; }
+  .ghost { fill: var(--accent); opacity: 0; pointer-events: none; }
+  .lamp { fill: var(--accent); pointer-events: none; }
+  .controls { display: flex; flex-wrap: wrap; border-top: 1px solid var(--ink); }
+  .controls button { padding: 0.9rem 1.1rem; border-right: 1px solid var(--line); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 500; }
+  .controls button:hover { background: var(--ink); color: var(--paper); }
+  .count { margin-left: auto; padding: 0.9rem 1.1rem; color: var(--graphite); text-transform: uppercase; letter-spacing: 0.12em; }
+</style>

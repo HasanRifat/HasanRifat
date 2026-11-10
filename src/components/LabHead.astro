@@ -1,0 +1,15 @@
+---
+import { href } from '../lib/url';
+const { no, title, note } = Astro.props;
+---
+<header class="sheet-head lab-head">
+  <p class="mono cap eyebrow"><b>{no}</b><a href={href('/lab/')}>Laboratory</a></p>
+  <h1 class="display">{title}</h1>
+  <p class="lab-note">{note}</p>
+</header>
+<style>
+  .lab-head { margin-bottom: 2.5rem; }
+  .lab-head h1 { font-size: clamp(3rem, 8vw, 7rem); }
+  .lab-note { max-width: 52ch; color: var(--graphite); }
+  .eyebrow a { text-decoration: none; }
+</style>

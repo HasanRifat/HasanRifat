@@ -1,0 +1,68 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import SheetHead from '../components/SheetHead.astro';
+import SheetFoot from '../components/SheetFoot.astro';
+import { site } from '../data/site';
+---
+<Sheet room="sitting" title="About" description="An introduction to Rifat Hasan: software for Los Angeles County by day, a handful of longer projects after hours.">
+  <article class="sheet">
+    <SheetHead no="A-02" label="About" title="Sitting Room" standfirst="Where you'd be offered tea and asked what you do. My turn first." />
+
+    <div class="about">
+      <div class="about-body">
+        <p class="open">I work on the unglamorous end of software: the forms, queues and internal tools an institution actually runs on. I've come to like it there.</p>
+
+        <div class="prose">
+          <p>By day I'm an {site.role} at the {site.employer}'s office. Before that I built applications for the County's Board of Supervisors, and before that I worked in quality assurance at Kodify, which is a good education in how things fail.</p>
+          <p>Most of what I build is meant to disappear into someone's working day. An application that replaces a spreadsheet and three email threads. An automation that removes a step nobody enjoyed. The measure is whether people stop noticing it.</p>
+        </div>
+
+        <blockquote class="pull">A well-planned house tells you where to go <em>without a sign.</em></blockquote>
+
+        <div class="prose">
+          <p>After hours the projects get more personal. A halal poultry business I'm developing from the ground up. A library system for Islamic books and lectures. A structured path through Classical and Qur'anic Arabic. A private dashboard that is slowly becoming an assistant.</p>
+          <p>They look unrelated. They're the same habit: taking something scattered and giving it a structure you'd want to come back to.</p>
+          <p>I pay attention to buildings and rooms for the same reason. Good architecture is mostly decisions you never notice: where the door is, what you see first, how far the kitchen is from the table. I'd like software to work that way, which is why this site is a floor plan and not a menu.</p>
+          <p>The long plan is to build things of my own that outlast a job title. I'm in no hurry, and I'm not waiting either.</p>
+        </div>
+      </div>
+
+      <aside class="schedule" aria-label="Schedule">
+        <p class="mono cap">Schedule</p>
+        <dl>
+          <div><dt>Currently</dt><dd>{site.role}<br /><span>{site.employer}</span></dd></div>
+          <div><dt>Previously</dt><dd>Application Developer<br /><span>Los Angeles County Board of Supervisors</span></dd></div>
+          <div><dt></dt><dd>QA / QC<br /><span>Kodify</span></dd></div>
+          <div><dt>Studied</dt><dd>Computer Science<br /><span>California State University, Long Beach</span></dd></div>
+          <div><dt>Works in</dt><dd>Power Platform, web, automation, data</dd></div>
+          <div><dt>Based</dt><dd>{site.location}</dd></div>
+          <div><dt>Outside work</dt><dd>Arabic, Islamic studies, architecture and interiors</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </article>
+  <SheetFoot room="sitting" />
+</Sheet>
+
+<style>
+  .about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem); gap: clamp(2.5rem, 7vw, 7rem); align-items: start; }
+  .open {
+    font: 300 clamp(1.7rem, 3.4vw, 2.9rem)/1.14 var(--serif); font-variation-settings: 'opsz' 90; letter-spacing: -0.02em;
+    margin-bottom: 2.5rem; text-wrap: balance;
+  }
+  .about-body .prose { margin-left: clamp(0rem, 8vw, 7rem); }
+  .pull {
+    margin: clamp(3rem, 8vw, 6rem) 0; padding-top: 1.2rem; border-top: 1px solid var(--ink);
+    font: 300 clamp(2.4rem, 6.6vw, 6rem)/0.98 var(--serif); font-variation-settings: 'opsz' 144; letter-spacing: -0.03em; text-wrap: balance;
+  }
+  .pull em { color: var(--accent); }
+  .schedule { position: sticky; top: 2rem; border-top: 1px solid var(--ink); padding-top: 0.9rem; }
+  .schedule dl { margin-top: 1rem; }
+  .schedule dl div { display: grid; grid-template-columns: 6.2rem 1fr; gap: 0.5rem; padding: 0.75rem 0; border-top: 1px solid var(--hair); font-size: 0.92rem; line-height: 1.4; }
+  .schedule dt { font: 500 0.62rem/2.1 var(--mono); text-transform: uppercase; letter-spacing: 0.12em; color: var(--graphite); }
+  .schedule dd span { color: var(--graphite); }
+  @media (max-width: 760px) {
+    .about { grid-template-columns: 1fr; }
+    .schedule { position: static; }
+  }
+</style>
